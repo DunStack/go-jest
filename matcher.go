@@ -1,6 +1,8 @@
 package jest
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type MatcherFn[M any] func(e *Expect) M
 
@@ -38,6 +40,7 @@ func (m BuiltinMatcher) ToEqual(v any) {
 }
 
 func (m BuiltinMatcher) ToHaveLength(i int) {
+	m.Helper()
 	v := m.Value()
 	defer func() {
 		m.Helper()
@@ -46,8 +49,17 @@ func (m BuiltinMatcher) ToHaveLength(i int) {
 		}
 	}()
 
-	m.Helper()
 	g := reflect.ValueOf(v).Len()
 	m.WithValue(g)
 	m.ToBe(i)
+}
+
+func (m BuiltinMatcher) ToBeTypeOf(v any) {
+	m.Helper()
+	if w, g := reflect.TypeOf(v), reflect.TypeOf(m.Value()); m.Check(w != g) {
+		m.Errorf("\nwant: %s\ngot: %s",
+			m.WantSprintf("%T", v),
+			m.GotSprintf("%T", m.Value()),
+		)
+	}
 }

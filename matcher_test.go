@@ -87,4 +87,31 @@ func TestBuiltinMatcher(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("ToBeTypeOf", func(t *testing.T) {
+		type S struct{}
+
+		jest.Test(mt, func(j *jest.J[jest.BuiltinMatcher]) {
+			mt.Reset()
+			if j.Expect(S{}).ToBeTypeOf(S{}); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(S{}).Not().ToBeTypeOf(S{}); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("not jest_test.S"), color.RedString("jest_test.S")) {
+				t.Log(mt.message)
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect([]int{1, 2}).ToBeTypeOf([]string{}); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("[]string"), color.RedString("[]int")) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect([]int{1, 2}).Not().ToBeTypeOf([]string{}); mt.fail {
+				t.Fail()
+			}
+		})
+	})
 }
