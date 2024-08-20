@@ -1,5 +1,7 @@
 package jest
 
+import "reflect"
+
 type MatcherFn[M any] func(e *Expect) M
 
 func NewBuiltinMatcher(e *Expect) BuiltinMatcher {
@@ -18,6 +20,16 @@ func (m BuiltinMatcher) Not() BuiltinMatcher {
 func (m BuiltinMatcher) ToBe(v any) {
 	m.Helper()
 	if g := m.Value(); m.Check(v != g) {
+		m.Errorf("\nwant: %s\ngot: %s",
+			m.WantSprint(v),
+			m.GotSprint(g),
+		)
+	}
+}
+
+func (m BuiltinMatcher) ToEqual(v any) {
+	m.Helper()
+	if g := m.Value(); m.Check(!reflect.DeepEqual(v, g)) {
 		m.Errorf("\nwant: %s\ngot: %s",
 			m.WantSprint(v),
 			m.GotSprint(g),
