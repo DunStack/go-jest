@@ -58,4 +58,33 @@ func TestBuiltinMatcher(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("ToHaveLength", func(t *testing.T) {
+		jest.Test(mt, func(j *jest.J[jest.BuiltinMatcher]) {
+			mt.Reset()
+			if j.Expect("abc").ToHaveLength(3); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect("abc").Not().ToHaveLength(3); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("not 3"), color.RedString("3")) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect([]int{1, 2}).ToHaveLength(3); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("3"), color.RedString("2")) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect([]int{1, 2}).Not().ToHaveLength(3); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(1).ToHaveLength(0); mt.message != "cannot get length of 1" {
+				t.Fail()
+			}
+		})
+	})
 }

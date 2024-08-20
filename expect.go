@@ -21,6 +21,11 @@ func (e Expect) Value() any {
 	return e.v
 }
 
+func (e *Expect) WithValue(v any) *Expect {
+	e.v = v
+	return e
+}
+
 func (e Expect) Not() bool {
 	return e.not
 }

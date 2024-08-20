@@ -36,3 +36,18 @@ func (m BuiltinMatcher) ToEqual(v any) {
 		)
 	}
 }
+
+func (m BuiltinMatcher) ToHaveLength(i int) {
+	v := m.Value()
+	defer func() {
+		m.Helper()
+		if err := recover(); err != nil {
+			m.Errorf("cannot get length of %#v", v)
+		}
+	}()
+
+	m.Helper()
+	g := reflect.ValueOf(v).Len()
+	m.WithValue(g)
+	m.ToBe(i)
+}
