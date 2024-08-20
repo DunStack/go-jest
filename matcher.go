@@ -63,3 +63,36 @@ func (m BuiltinMatcher) ToBeTypeOf(v any) {
 		)
 	}
 }
+
+func (m BuiltinMatcher) ToPanic(v ...any) {
+	m.Helper()
+	fn, ok := m.Value().(func())
+	if !ok {
+		m.Errorf("Expect's argument must be a function")
+	}
+
+	defer func() {
+		m.Helper()
+		g := recover()
+		if g == nil {
+			if !m.Expect.Not() {
+				m.Errorf("\nwant: %s\ngot: %s",
+					m.WantSprintf("%s", "panicking"),
+					m.GotSprintf("%s", "not panicking"),
+				)
+			}
+		} else if len(v) == 0 {
+			if m.Expect.Not() {
+				m.Errorf("\nwant: %s\ngot: %s",
+					m.WantSprintf("%s", "panicking"),
+					m.GotSprintf("%s", "panicking"),
+				)
+			}
+		} else {
+			m.WithValue(g)
+			m.ToEqual(v[0])
+		}
+	}()
+
+	fn()
+}

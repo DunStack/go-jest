@@ -99,7 +99,6 @@ func TestBuiltinMatcher(t *testing.T) {
 
 			mt.Reset()
 			if j.Expect(S{}).Not().ToBeTypeOf(S{}); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("not jest_test.S"), color.RedString("jest_test.S")) {
-				t.Log(mt.message)
 				t.Fail()
 			}
 
@@ -110,6 +109,55 @@ func TestBuiltinMatcher(t *testing.T) {
 
 			mt.Reset()
 			if j.Expect([]int{1, 2}).Not().ToBeTypeOf([]string{}); mt.fail {
+				t.Fail()
+			}
+		})
+	})
+
+	t.Run("ToPanic", func(t *testing.T) {
+		jest.Test(mt, func(j *jest.J[jest.BuiltinMatcher]) {
+			mt.Reset()
+			if j.Expect("a").ToPanic(); mt.message != "Expect's argument must be a function" {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() {}).ToPanic(); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("panicking"), color.RedString("not panicking")) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() {}).Not().ToPanic(); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).ToPanic(); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).Not().ToPanic(); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("not panicking"), color.RedString("panicking")) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).ToPanic("error"); mt.fail {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).Not().ToPanic("error"); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString(`not "error"`), color.RedString(`"error"`)) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).ToPanic(1); mt.message != fmt.Sprintf("\nwant: %s\ngot: %s", color.GreenString("1"), color.RedString(`"error"`)) {
+				t.Fail()
+			}
+
+			mt.Reset()
+			if j.Expect(func() { panic("error") }).Not().ToPanic(1); mt.fail {
 				t.Fail()
 			}
 		})
