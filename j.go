@@ -1,5 +1,7 @@
 package jest
 
+type TestFn[M any] func(j *J[M])
+
 type J[M any] struct {
 	jest *Jest[M]
 	t    T
